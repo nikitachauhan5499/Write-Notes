@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,9 +18,11 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> {
 
     private List<Note> notes;
     private Context mContext;
+    private OnNoteListener onNoteListener;
 
-    public NoteAdapter(Context context) {
-        mContext = context;
+    public NoteAdapter(Context context, OnNoteListener onNoteListener) {
+        this.mContext = context;
+        this.onNoteListener = onNoteListener;
     }
 
     @NonNull
@@ -28,7 +31,7 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> {
     public ViewHolder onCreateViewHolder(@NonNull @org.jetbrains.annotations.NotNull ViewGroup parent, int viewType) {
         final View view = LayoutInflater.from(mContext)
                 .inflate(R.layout.single_note_item, parent, false);
-        return new ViewHolder(view);
+        return new ViewHolder(view, onNoteListener);
     }
 
     @Override
@@ -52,16 +55,29 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> {
     }
 
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private TextView title_tv;
         private TextView desc_tv;
 
-        public ViewHolder(@NonNull @org.jetbrains.annotations.NotNull View itemView) {
+        private OnNoteListener onNoteListener;
+
+        public ViewHolder(@NonNull @org.jetbrains.annotations.NotNull View itemView, OnNoteListener onNoteListener) {
             super(itemView);
 
             title_tv = (TextView) itemView.findViewById(R.id.tv_title);
             desc_tv = (TextView) itemView.findViewById(R.id.tv_desc);
+            this.onNoteListener = onNoteListener;
+            itemView.setOnClickListener(this);
         }
+
+        @Override
+        public void onClick(View view) {
+            onNoteListener.onNoteClick(getAdapterPosition());
+        }
+    }
+
+    public interface OnNoteListener {
+        void onNoteClick(int position);
     }
 }

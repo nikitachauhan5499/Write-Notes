@@ -21,4 +21,7 @@ public interface NoteDao {
 
     @Delete
     void delete(Note note);
+
+    @Query("SELECT * FROM notes WHERE id=:id")
+    Note loadNoteById(int id);
 }

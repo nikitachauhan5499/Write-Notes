@@ -4,8 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
+import android.util.Log;
 import android.widget.EditText;
 
 import com.example.android.writenotes.data.AppDatabase;
@@ -13,9 +12,13 @@ import com.example.android.writenotes.data.Note;
 
 public class AddNoteActivity extends AppCompatActivity {
 
+    private static final String TAG = "AddNoteActivity";
     private EditText ed_title, ed_desc;
-    private Button save_button;
     private AppDatabase db;
+    public static final String EXTRA_NOTE_ID = "extraTaskId";
+    public static final int DEFAULT_NOTE_ID = -1;
+    private int noteId = DEFAULT_NOTE_ID;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,7 +34,7 @@ public class AddNoteActivity extends AppCompatActivity {
         super.onBackPressed();
         String title = ed_title.getText().toString().trim();
         String desc = ed_desc.getText().toString().trim();
-        if(!title.isEmpty() || !desc.isEmpty()) {
+        if (!title.isEmpty() || !desc.isEmpty()) {
             Note note = new Note(title, desc);
             db.noteDao().insertAll(note);
         }

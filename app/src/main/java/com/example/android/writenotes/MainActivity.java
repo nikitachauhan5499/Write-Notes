@@ -3,11 +3,13 @@ package com.example.android.writenotes;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.room.Insert;
 import androidx.room.Room;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 
 import com.example.android.writenotes.data.AppDatabase;
 import com.example.android.writenotes.data.Note;
@@ -15,7 +17,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements NoteAdapter.OnNoteListener {
 
     private static final String TAG = MainActivity.class.getName();
 
@@ -33,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
         recyclerView = (RecyclerView) findViewById(R.id.rv_notes);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new NoteAdapter(this);
+        adapter = new NoteAdapter(this, this);
         recyclerView.setAdapter(adapter);
 
         fab.setOnClickListener(new View.OnClickListener() {
@@ -51,5 +53,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         adapter.setNotes(db.noteDao().getAll());
+    }
+
+    @Override
+    public void onNoteClick(int itemId) {
+        Intent intent = new Intent(MainActivity.this, AddNoteActivity.class);
+        intent.putExtra(AddNoteActivity.EXTRA_NOTE_ID, itemId);
+        startActivity(intent);
     }
 }
