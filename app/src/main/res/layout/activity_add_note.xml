@@ -18,8 +18,8 @@
         android:id="@+id/et_desc"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:hint="Note"
         android:gravity="start"
-        android:inputType="textCapSentences"/>
+        android:hint="Note"
+        android:inputType="textCapSentences" />
 
 </LinearLayout>

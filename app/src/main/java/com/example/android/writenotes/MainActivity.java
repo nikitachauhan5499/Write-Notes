@@ -1,21 +1,40 @@
 package com.example.android.writenotes;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.room.Room;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
+import com.example.android.writenotes.data.AppDatabase;
+import com.example.android.writenotes.data.Note;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG = MainActivity.class.getName();
+
     private FloatingActionButton fab;
+    private RecyclerView recyclerView;
+    private NoteAdapter adapter;
+    private AppDatabase db;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        fab = findViewById(R.id.fab);
+
+        fab = (FloatingActionButton) findViewById(R.id.fab);
+        recyclerView = (RecyclerView) findViewById(R.id.rv_notes);
+
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new NoteAdapter(this);
+        recyclerView.setAdapter(adapter);
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -24,5 +43,13 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        db = AppDatabase.getDatabase(getApplicationContext());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        adapter.setNotes(db.noteDao().getAll());
     }
 }
