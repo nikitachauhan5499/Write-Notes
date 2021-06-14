@@ -1,6 +1,9 @@
 package com.example.android.writenotes;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Insert;
@@ -14,6 +17,8 @@ import android.widget.Toast;
 import com.example.android.writenotes.data.AppDatabase;
 import com.example.android.writenotes.data.Note;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -38,6 +43,26 @@ public class MainActivity extends AppCompatActivity implements NoteAdapter.OnNot
         adapter = new NoteAdapter(this, this);
         recyclerView.setAdapter(adapter);
 
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+            @Override
+            public boolean onMove(@NonNull @NotNull RecyclerView recyclerView, @NonNull @NotNull RecyclerView.ViewHolder viewHolder, @NonNull @NotNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull @NotNull final RecyclerView.ViewHolder viewHolder, int direction) {
+                AppExecutors.getInstance().getDiskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        int position = viewHolder.getAdapterPosition();
+                        List<Note> notes = adapter.getNotes();
+                        db.noteDao().delete(notes.get(position));
+                        retrieveNotes();
+                    }
+                });
+            }
+        }).attachToRecyclerView(recyclerView);
+
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -52,6 +77,16 @@ public class MainActivity extends AppCompatActivity implements NoteAdapter.OnNot
     @Override
     protected void onResume() {
         super.onResume();
+        retrieveNotes();
+    }
+
+    @Override
+    public void onNoteClick(int position) {
+        Intent intent = new Intent(MainActivity.this, AddNoteActivity.class);
+        startActivity(intent);
+    }
+
+    public void retrieveNotes() {
         AppExecutors.getInstance().getDiskIO().execute(new Runnable() {
             @Override
             public void run() {
@@ -64,12 +99,5 @@ public class MainActivity extends AppCompatActivity implements NoteAdapter.OnNot
                 });
             }
         });
-    }
-
-    @Override
-    public void onNoteClick(int position) {
-        Intent intent = new Intent(MainActivity.this, AddNoteActivity.class);
-        intent.putExtra(AddNoteActivity.EXTRA_NOTE_ID, position);
-        startActivity(intent);
     }
 }
