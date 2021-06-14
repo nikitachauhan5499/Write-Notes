@@ -52,13 +52,24 @@ public class MainActivity extends AppCompatActivity implements NoteAdapter.OnNot
     @Override
     protected void onResume() {
         super.onResume();
-        adapter.setNotes(db.noteDao().getAll());
+        AppExecutors.getInstance().getDiskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                final List<Note> notes = db.noteDao().getAll();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        adapter.setNotes(notes);
+                    }
+                });
+            }
+        });
     }
 
     @Override
-    public void onNoteClick(int itemId) {
+    public void onNoteClick(int position) {
         Intent intent = new Intent(MainActivity.this, AddNoteActivity.class);
-        intent.putExtra(AddNoteActivity.EXTRA_NOTE_ID, itemId);
+        intent.putExtra(AddNoteActivity.EXTRA_NOTE_ID, position);
         startActivity(intent);
     }
 }

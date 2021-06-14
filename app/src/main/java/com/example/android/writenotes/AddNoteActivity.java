@@ -4,7 +4,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.EditText;
 
 import com.example.android.writenotes.data.AppDatabase;
@@ -34,10 +33,17 @@ public class AddNoteActivity extends AppCompatActivity {
         super.onBackPressed();
         String title = ed_title.getText().toString().trim();
         String desc = ed_desc.getText().toString().trim();
-        if (!title.isEmpty() || !desc.isEmpty()) {
-            Note note = new Note(title, desc);
-            db.noteDao().insertAll(note);
-        }
-        finish();
+        final Note note = new Note(title, desc);
+        AppExecutors.getInstance().getDiskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                if (!title.isEmpty() || !desc.isEmpty()) {
+                    db.noteDao().insertAll(note);
+                    finish();
+                }
+            }
+        });
+
+
     }
 }
