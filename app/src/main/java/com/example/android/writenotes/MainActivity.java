@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity implements NoteAdapter.OnNot
         adapter = new NoteAdapter(this, this);
         recyclerView.setAdapter(adapter);
 
-        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
             @Override
             public boolean onMove(@NonNull @NotNull RecyclerView recyclerView, @NonNull @NotNull RecyclerView.ViewHolder viewHolder, @NonNull @NotNull RecyclerView.ViewHolder target) {
                 return false;
@@ -81,8 +81,9 @@ public class MainActivity extends AppCompatActivity implements NoteAdapter.OnNot
     }
 
     @Override
-    public void onNoteClick(int position) {
+    public void onNoteClick(int itemId) {
         Intent intent = new Intent(MainActivity.this, AddNoteActivity.class);
+        intent.putExtra(AddNoteActivity.EXTRA_NOTE_ID, itemId);
         startActivity(intent);
     }
 

@@ -26,6 +26,33 @@ public class AddNoteActivity extends AppCompatActivity {
         ed_title = (EditText) findViewById(R.id.et_title);
         ed_desc = (EditText) findViewById(R.id.et_desc);
         db = AppDatabase.getDatabase(getApplicationContext());
+
+        Intent intent = getIntent();
+        if(intent!=null && intent.hasExtra(EXTRA_NOTE_ID)) {
+            if(noteId == DEFAULT_NOTE_ID) {
+                noteId = intent.getIntExtra(EXTRA_NOTE_ID, DEFAULT_NOTE_ID);
+                AppExecutors.getInstance().getDiskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        final Note note = db.noteDao().loadNoteById(noteId+46);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                populateUI(note);
+                            }
+                        });
+                    }
+                });
+            }
+        }
+    }
+
+    private void populateUI(Note note) {
+        if(note == null) {
+            return;
+        }
+        ed_title.setText(note.getTitle());
+        ed_desc.setText(note.getDesc());
     }
 
     @Override
@@ -38,9 +65,14 @@ public class AddNoteActivity extends AppCompatActivity {
             @Override
             public void run() {
                 if (!title.isEmpty() || !desc.isEmpty()) {
-                    db.noteDao().insertAll(note);
-                    finish();
+                    if(noteId==DEFAULT_NOTE_ID) {
+                        db.noteDao().insertAll(note);
+                    } else {
+                        note.setId(noteId+46);
+                        db.noteDao().update(note);
+                    }
                 }
+                finish();
             }
         });
 
